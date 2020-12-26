@@ -19,7 +19,11 @@ The processed video samples can include other content besides the time signal - 
 
 # Wall clock synchronization
 
-Clock synchronization between generator and interpreter is assumed. Easiest method might be to just run them on the same PC.
+Clock synchronization between generator and interpreter is assumed. Results will be invalid if time is out of sync.
+
+There is built-in support for automatic clock synchronization by referencing a deployed instance of [dash-timeserver](https://github.com/sandersaares/dash-timeserver).
+
+Alternatively, running both apps on the same PC can yield acceptable results (though may be logically difficult).
 
 # Processing
 
