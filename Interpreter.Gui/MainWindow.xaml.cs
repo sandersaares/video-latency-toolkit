@@ -12,9 +12,6 @@ using Point = System.Drawing.Point;
 
 namespace Vltk.Interpreter.Gui
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -29,8 +26,6 @@ namespace Vltk.Interpreter.Gui
 
             Reset();
         }
-
-        private readonly FpsCounter _fps = new FpsCounter();
 
         private IntPtr _targetWindow;
 
@@ -69,7 +64,7 @@ namespace Vltk.Interpreter.Gui
 
                 var result = reader.Decode(bitmap);
 
-                _fps.AddEvent();
+                Fps.AddEvent();
 
                 if (result == null)
                 {
@@ -78,11 +73,37 @@ namespace Vltk.Interpreter.Gui
                 else
                 {
                     var payload = SignalPayload.Deserialize(result.Text);
-                    var originalTimestamp = new DateTimeOffset(payload.TicksUtc, TimeSpan.Zero);
-                    var diff = DateTimeOffset.UtcNow - originalTimestamp;
 
-                    var value = diff.TotalMilliseconds;
-                    _movingAverageItems.Enqueue(value);
+                    if (payload.TimeserverUrl != null)
+                    {
+                        if (Uri.TryCreate(payload.TimeserverUrl, UriKind.Absolute, out var url))
+                        {
+                            TrueTime.TimeserverUrl = url;
+                        }
+                        else
+                        {
+                            // It might really be invalid or the parse might have failed (it is not perfect).
+                            // Ignore such a case - if it is a broken parse, we'll fix it next parse. Otherwise, user should notice lack of time sync.
+                        }
+                    }
+                    else
+                    {
+                        TrueTime.TimeserverUrl = null;
+                    }
+
+                    DateTimeOffset? referenceTime = DateTimeOffset.UtcNow;
+
+                    if (TrueTime.TimeserverUrl != null)
+                        referenceTime = TrueTime.TrueTime; // Might be null (if still syncing).
+
+                    if (referenceTime != null)
+                    {
+                        var originalTimestamp = new DateTimeOffset(payload.TicksUtc, TimeSpan.Zero);
+                        var diff = referenceTime.Value - originalTimestamp;
+
+                        var value = diff.TotalMilliseconds;
+                        _movingAverageItems.Enqueue(value);
+                    }
                 }
 
                 while (_movingAverageItems.Count > MovingAverageOverCount)
@@ -91,7 +112,6 @@ namespace Vltk.Interpreter.Gui
                 if (_movingAverageItems.Any())
                 {
                     var avg = _movingAverageItems.Average();
-
                     MessageArea.Text = "";
                     LatencyLabel.Text = $"{avg:N0} ms";
                 }
@@ -105,17 +125,13 @@ namespace Vltk.Interpreter.Gui
             {
                 MessageArea.Text = ex.Message;
             }
-            finally
-            {
-                FpsLabel.Text = ((int)_fps.MovingAverageFps).ToString(CultureInfo.InvariantCulture);
-                LastUpdateLabel.Text = DateTimeOffset.UtcNow.ToString(VltkConstants.TimestampFormat);
-            }
         }
 
         private readonly DispatcherTimer _timer = new DispatcherTimer();
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // We only start the timer when something is selected from among the window candidates.
         }
 
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
@@ -128,8 +144,9 @@ namespace Vltk.Interpreter.Gui
             _timer.Stop();
             MessageArea.Text = "";
             LatencyLabel.Text = "";
-            LastUpdateLabel.Text = "";
             _movingAverageItems.Clear();
+
+            TrueTime.TimeserverUrl = null;
 
             WindowCandidates.SelectedItem = null;
             WindowCandidates.ItemsSource = WindowManagement.GetOpenWindows();

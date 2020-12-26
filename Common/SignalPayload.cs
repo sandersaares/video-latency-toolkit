@@ -17,6 +17,12 @@ namespace Vltk.Common
         public long TicksUtc { get; set; }
 
         /// <summary>
+        /// URL of the dash-timeserver that provides the clock synchronization signal.
+        /// If set, the intepreter will automatically establish clock sync and use synchronized time.
+        /// </summary>
+        public string? TimeserverUrl { get; set; }
+
+        /// <summary>
         /// Deserializes from a string that has been retrieved from visual channel.
         /// </summary>
         public static SignalPayload Deserialize(string s) => JsonSerializer.Deserialize<SignalPayload>(s) ?? throw new NotSupportedException("Payload deserialized to null.");

@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Vltk.Interpreter.Gui"
+        xmlns:gui="clr-namespace:Vltk.Common.Gui;assembly=Vltk.Common.Gui"
         mc:Ignorable="d"
-        Title="Video latency toolkit - interpreter" Height="200" Width="700" ResizeMode="CanMinimize">
+        Title="Video latency toolkit - interpreter" Height="250" Width="700" MinHeight="250" MinWidth="700" ResizeMode="CanResize">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="auto" />
@@ -15,6 +16,8 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="auto" />
+      <RowDefinition Height="auto" />
       <RowDefinition Height="auto" />
     </Grid.RowDefinitions>
 
@@ -33,25 +36,14 @@
         <ColumnDefinition />
         <ColumnDefinition />
       </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="auto" />
-        <RowDefinition Height="auto" />
-        <RowDefinition Height="auto" />
-      </Grid.RowDefinitions>
 
       <TextBlock HorizontalAlignment="Right" Margin="8"
                  Text="Moving average latency:" />
-      <TextBlock x:Name="LatencyLabel" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8" />
-
-      <TextBlock Grid.Row="1" HorizontalAlignment="Right" Margin="8"
-                 Text="FPS:" />
-      <TextBlock x:Name="FpsLabel" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8"
-                 Text="0" />
-
-      <TextBlock Grid.Row="2" HorizontalAlignment="Right" Margin="8"
-                 Text="Last updated:" />
-      <TextBlock x:Name="LastUpdateLabel" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8"
-                 Text="" />
+      <TextBlock x:Name="LatencyLabel" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8" />
     </Grid>
+    
+    <gui:TrueTimePanel x:Name="TrueTime" Grid.Row="3" Grid.ColumnSpan="3" />
+
+    <gui:FrameRateVisualizer x:Name="Fps" Grid.Row="4" Grid.ColumnSpan="3" />
   </Grid>
 </Window>

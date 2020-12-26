@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>Vltk.Interpreter.Gui</AssemblyName>
-    <RootNamespace>Vltk.Interpreter.Gui</RootNamespace>
+
+    <AssemblyName>Vltk.Common.Gui</AssemblyName>
+    <RootNamespace>Vltk.Common.Gui</RootNamespace>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
@@ -14,13 +13,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Koek" Version="1.1.0" />
-    <PackageReference Include="ZXing.Net" Version="0.16.6" />
+    <PackageReference Include="DashTimeserver.Client" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common.Gui\Common.Gui.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
+    
   </ItemGroup>
 
 </Project>

@@ -4,37 +4,43 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Vltk.Generator.Gui"
+        xmlns:gui="clr-namespace:Vltk.Common.Gui;assembly=Vltk.Common.Gui"
         mc:Ignorable="d"
-        Title="Video latency toolkit - signal generator" Height="512" Width="512" ResizeMode="CanMinimize">
+        Title="Video latency toolkit - signal generator" Height="512" Width="512" MinHeight="512" MinWidth="512" ResizeMode="CanResize">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
       <RowDefinition Height="auto" />
+      <RowDefinition Height="auto" />
+      <RowDefinition Height="auto" />
     </Grid.RowDefinitions>
     
     <Grid Margin="64">
-      <Path x:Name="SignalPresenter" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Black" />
+      <Image x:Name="ImagePresenter" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
     </Grid>
 
-    <Grid Grid.Row="1">
+    <Grid Grid.Row="1" Margin="8,0">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition />
-        <ColumnDefinition />
+        <ColumnDefinition Width="auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="auto" />
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
+        <RowDefinition Height="auto" />
+        <RowDefinition Height="*" />
         <RowDefinition Height="auto" />
         <RowDefinition Height="auto" />
       </Grid.RowDefinitions>
 
-      <TextBlock HorizontalAlignment="Right" Margin="8"
-                 Text="FPS:" />
-      <TextBlock x:Name="FpsLabel" Grid.Column="1" HorizontalAlignment="Left" Margin="8"
-                 Text="0" />
-
-      <TextBlock Grid.Row="1" HorizontalAlignment="Right" Margin="8"
-                 Text="Last updated:" />
-      <TextBlock x:Name="LastUpdateLabel" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8"
-                 Text="" />
+      <TextBlock Text="Timeserver URL:" Margin="8" />
+      <TextBox x:Name="TimeserverUrl" Grid.Column="1" Margin="8" />
+      <Button x:Name="ApplyTimeserverButton" Grid.Column="2" Margin="8"
+            Padding="16,0"
+            Content="Apply" Click="ApplyTimeserverButton_Click" />
     </Grid>
+    
+    <gui:TrueTimePanel x:Name="TrueTime" Grid.Row="2" />
+
+    <gui:FrameRateVisualizer x:Name="Fps" Grid.Row="3" />
   </Grid>
 </Window>

@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Gui", "Generator.Gui\Generator.Gui.csproj", "{80E07899-F411-4E1A-A1EB-4DED707C5DE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Generator.Gui", "Generator.Gui\Generator.Gui.csproj", "{80E07899-F411-4E1A-A1EB-4DED707C5DE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter.Gui", "Interpreter.Gui\Interpreter.Gui.csproj", "{3B4E464E-579A-43F5-AFF0-11D73334066A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interpreter.Gui", "Interpreter.Gui\Interpreter.Gui.csproj", "{3B4E464E-579A-43F5-AFF0-11D73334066A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{CE76E0D2-F370-4018-BAF6-AC7AF8193C1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{CE76E0D2-F370-4018-BAF6-AC7AF8193C1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Gui", "Common.Gui\Common.Gui.csproj", "{C8445816-B0A7-475F-B3D5-192947345481}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{CE76E0D2-F370-4018-BAF6-AC7AF8193C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE76E0D2-F370-4018-BAF6-AC7AF8193C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE76E0D2-F370-4018-BAF6-AC7AF8193C1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8445816-B0A7-475F-B3D5-192947345481}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8445816-B0A7-475F-B3D5-192947345481}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8445816-B0A7-475F-B3D5-192947345481}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8445816-B0A7-475F-B3D5-192947345481}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

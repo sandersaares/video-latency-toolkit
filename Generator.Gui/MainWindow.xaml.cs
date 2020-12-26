@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Globalization;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Vltk.Common;
 using ZXing;
-using ZXing.Presentation;
 
 namespace Vltk.Generator.Gui
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -22,33 +18,57 @@ namespace Vltk.Generator.Gui
 
             Loaded += MainWindow_Loaded;
             Unloaded += MainWindow_Unloaded;
-        }
 
-        private readonly FpsCounter _fps = new FpsCounter();
+            TimeserverUrl.Text = GeneratorSettings.Current.TimeserverUrl?.ToString();
+
+            if (!string.IsNullOrWhiteSpace(TimeserverUrl.Text))
+            {
+                // Only wire up the URL if the URL is valid.
+                if (Uri.TryCreate(TimeserverUrl.Text, UriKind.Absolute, out var url))
+                    TrueTime.TimeserverUrl = url;
+            }
+        }
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            var writer = new BarcodeWriterGeometry
+            var writer = new ZXing.Presentation.BarcodeWriter
             {
                 Format = BarcodeFormat.QR_CODE,
                 Options = new ZXing.Common.EncodingOptions
                 {
-                    Height = (int)((FrameworkElement)SignalPresenter.Parent).ActualHeight,
-                    Width = (int)((FrameworkElement)SignalPresenter.Parent).ActualWidth,
+                    Height = (int)((FrameworkElement)ImagePresenter.Parent).ActualHeight,
+                    Width = (int)((FrameworkElement)ImagePresenter.Parent).ActualWidth,
                     Margin = 0
                 }
             };
 
-            var image = writer.Write(new SignalPayload
+            WriteableBitmap? image = null;
+
+            if (TrueTime.TimeserverUrl == null)
             {
-                TicksUtc = DateTimeOffset.UtcNow.Ticks
-            }.Serialize());
+                image = writer.Write(new SignalPayload
+                {
+                    TicksUtc = DateTimeOffset.UtcNow.Ticks,
+                }.Serialize());
+            }
+            else
+            {
+                var time = TrueTime.TrueTime;
 
-            SignalPresenter.Data = image;
+                // If a timeserver is set, we only present an image when we have true time.
+                if (time != null)
+                {
+                    image = writer.Write(new SignalPayload
+                    {
+                        TicksUtc = time.Value.Ticks,
+                        TimeserverUrl = TrueTime.TimeserverUrl.ToString()
+                    }.Serialize());
+                }
+            }
 
-            _fps.AddEvent();
-            FpsLabel.Text = ((int)_fps.MovingAverageFps).ToString(CultureInfo.InvariantCulture);
-            LastUpdateLabel.Text = DateTimeOffset.UtcNow.ToString(VltkConstants.TimestampFormat);
+            ImagePresenter.Source = image;
+
+            Fps.AddEvent();
         }
 
         private readonly DispatcherTimer _timer = new DispatcherTimer();
@@ -61,6 +81,26 @@ namespace Vltk.Generator.Gui
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
             _timer.Stop();
+        }
+
+        private void ApplyTimeserverButton_Click(object sender, RoutedEventArgs e)
+        {
+            GeneratorSettings.Current.TimeserverUrl = TimeserverUrl.Text;
+            GeneratorSettings.Current.Save();
+
+            if (string.IsNullOrWhiteSpace(TimeserverUrl.Text))
+            {
+                TrueTime.TimeserverUrl = null;
+                return;
+            }
+
+            if (!Uri.TryCreate(TimeserverUrl.Text, UriKind.Absolute, out var url))
+            {
+                MessageBox.Show("Not a valid URL.", "Timeserver URL", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            TrueTime.TimeserverUrl = url;
         }
     }
 }

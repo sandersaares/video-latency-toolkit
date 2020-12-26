@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="Vltk.Common.Gui.TrueTimePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Vltk.Common.Gui"
+             mc:Ignorable="d" 
+             d:DesignHeight="128" d:DesignWidth="512">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+
+    <TextBlock HorizontalAlignment="Right" Margin="8"
+               Text="Synchronized wall clock time:" />
+    <TextBlock x:Name="OutputLabel" Grid.Column="1" HorizontalAlignment="Left" Margin="8"
+               TextWrapping="WrapWithOverflow"
+               Text="" />
+  </Grid>
+</UserControl>
