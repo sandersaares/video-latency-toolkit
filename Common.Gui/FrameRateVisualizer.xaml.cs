@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Koek;
+using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,7 +9,7 @@ namespace Vltk.Common.Gui
 {
     public partial class FrameRateVisualizer : UserControl
     {
-        public void AddEvent() => _counter.AddEvent();
+        public void AddEvent() => _renders.Add(this);
 
         public FrameRateVisualizer()
         {
@@ -22,7 +23,7 @@ namespace Vltk.Common.Gui
 
         private void OnTimerTick(object? sender, EventArgs e)
         {
-            FpsLabel.Text = _counter.MovingAverageFps.ToString("N0", CultureInfo.InvariantCulture);
+            FpsLabel.Text = _renders.GetCount().ToString("N0", CultureInfo.InvariantCulture);
         }
 
         private readonly DispatcherTimer _refreshTimer = new DispatcherTimer
@@ -30,7 +31,7 @@ namespace Vltk.Common.Gui
             Interval = TimeSpan.FromSeconds(0.1)
         };
 
-        private readonly FpsCounter _counter = new FpsCounter();
+        private readonly ExpiringCollection<object> _renders = new(TimeSpan.FromSeconds(1));
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {

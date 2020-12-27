@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Koek;
+using System;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,8 +28,7 @@ namespace Vltk.Interpreter.Gui
 
         private IntPtr _targetWindow;
 
-        private const int MovingAverageOverCount = 30;
-        private readonly Queue<double> _movingAverageItems = new Queue<double>();
+        private readonly ExpiringCollection<double> _latencyMeasurements = new(TimeSpan.FromSeconds(1));
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
@@ -102,18 +100,16 @@ namespace Vltk.Interpreter.Gui
                         var diff = referenceTime.Value - originalTimestamp;
 
                         var value = diff.TotalMilliseconds;
-                        _movingAverageItems.Enqueue(value);
+                        _latencyMeasurements.Add(value);
                     }
                 }
 
-                while (_movingAverageItems.Count > MovingAverageOverCount)
-                    _movingAverageItems.Dequeue();
+                var movingAverage = _latencyMeasurements.DefaultIfEmpty(0).Average();
 
-                if (_movingAverageItems.Any())
+                if (movingAverage != 0)
                 {
-                    var avg = _movingAverageItems.Average();
                     MessageArea.Text = "";
-                    LatencyLabel.Text = $"{avg:N0} ms";
+                    LatencyLabel.Text = $"{movingAverage:N0} ms";
                 }
                 else
                 {
@@ -144,7 +140,7 @@ namespace Vltk.Interpreter.Gui
             _timer.Stop();
             MessageArea.Text = "";
             LatencyLabel.Text = "";
-            _movingAverageItems.Clear();
+            _latencyMeasurements.Clear();
 
             TrueTime.TimeserverUrl = null;
 
