@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
 
-    <AssemblyName>Vltk.Common.Gui</AssemblyName>
-    <RootNamespace>Vltk.Common.Gui</RootNamespace>
+    <AssemblyName>Vltk.Interpreter.Pipe</AssemblyName>
+    <RootNamespace>Vltk.Interpreter.Pipe</RootNamespace>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
@@ -14,11 +14,12 @@
 
   <ItemGroup>
     <PackageReference Include="Koek" Version="1.5.0" />
+    <PackageReference Include="Mono.Options" Version="6.6.0.161" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    
   </ItemGroup>
 
 </Project>

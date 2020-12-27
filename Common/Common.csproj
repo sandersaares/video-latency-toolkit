@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DashTimeserver.Client" Version="1.0.2" />
     <PackageReference Include="Koek" Version="1.5.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" />
   </ItemGroup>
 </Project>

@@ -14,6 +14,7 @@ The generator can emit:
 The interpreter can process:
 
 * A screen capture (for capturing a video player window).
+* A stream of decoded video frames in NV12 format (stdin NV12 -> stdout JSON).
 
 The processed video samples can include other content besides the time signal - the interpreter knows how to find the embedded signal from among other content. Just ensure that the entire signal generator window is visible in the output.
 
