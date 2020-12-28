@@ -140,7 +140,7 @@ namespace Vltk.Interpreter.Pipe
             {
                 "Usage: Vltk.Interpreter.Pipe.exe --width 123 --height 456",
                 "Feed NV12 formatted video samples into stdin, extract sequence of latency result JSON objects from stdout.",
-                "Example output: { 'LatencyMilliseconds': 12.345 }",
+                "Example output: {{ 'LatencyMilliseconds': 12.345 }}",
                 "",
                 { "h|?|help", "Displays usage instructions.", val => showHelp = val != null },
                 "",
