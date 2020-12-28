@@ -29,3 +29,7 @@ Alternatively, running both apps on the same PC can yield acceptable results (th
 # Processing
 
 There is some processing latency - perform a "dry run" by providing generator output directly to the interpreter to determine the procecssing latency on your system.
+
+# System requirements
+
+Requires .NET 5.0 on Windows.
