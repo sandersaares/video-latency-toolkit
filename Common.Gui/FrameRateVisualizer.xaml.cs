@@ -1,4 +1,5 @@
 ﻿using Koek;
+using Prometheus;
 using System;
 using System.Globalization;
 using System.Windows;
@@ -24,6 +25,7 @@ namespace Vltk.Common.Gui
         private void OnTimerTick(object? sender, EventArgs e)
         {
             FpsLabel.Text = _renders.GetCount().ToString("N0", CultureInfo.InvariantCulture);
+            _fps.Set(_renders.GetCount());
         }
 
         private readonly DispatcherTimer _refreshTimer = new DispatcherTimer
@@ -41,6 +43,9 @@ namespace Vltk.Common.Gui
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             _refreshTimer.Stop();
+            _fps.Unpublish();
         }
+
+        private static readonly Gauge _fps = Metrics.CreateGauge("vltk_fps", "Frames processed per second.");
     }
 }

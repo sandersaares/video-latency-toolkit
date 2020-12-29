@@ -19,6 +19,7 @@
       <RowDefinition Height="auto" />
       <RowDefinition Height="auto" />
       <RowDefinition Height="auto" />
+      <RowDefinition Height="auto" />
     </Grid.RowDefinitions>
 
     <TextBlock Text="Capture window:" Margin="8" />
@@ -45,5 +46,7 @@
     <gui:TrueTimePanel x:Name="TrueTime" Grid.Row="3" Grid.ColumnSpan="3" />
 
     <gui:FrameRateVisualizer x:Name="Fps" Grid.Row="4" Grid.ColumnSpan="3" />
+
+    <local:MetricsPanel Grid.Row="5" Grid.ColumnSpan="3" />
   </Grid>
 </Window>

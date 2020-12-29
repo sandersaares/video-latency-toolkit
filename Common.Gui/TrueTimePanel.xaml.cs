@@ -1,5 +1,7 @@
 ﻿using DashTimeserver.Client;
+using Prometheus;
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,6 +94,21 @@ namespace Vltk.Common.Gui
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+
+            if (!DesignerProperties.GetIsInDesignMode(this))
+            {
+                // This is a global registration, so we avoid making it in the designer.
+                // Even at runtime it is a bit dirty.
+                Metrics.DefaultRegistry.AddBeforeCollectCallback(delegate
+                {
+                    var trueTime = TrueTime;
+
+                    if (trueTime == null)
+                        _trueTimeGauge.Unpublish();
+                    else
+                        _trueTimeGauge.SetToTimeUtc(trueTime.Value);
+                });
+            }
         }
 
         private void OnTimerTick(object? sender, EventArgs e)
@@ -128,5 +145,7 @@ namespace Vltk.Common.Gui
         {
             _refreshTimer.Stop();
         }
+
+        private static readonly Gauge _trueTimeGauge = Metrics.CreateGauge("synchronized_time_seconds", "The true time obtained from the timeserver.");
     }
 }

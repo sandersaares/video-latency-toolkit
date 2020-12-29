@@ -1,4 +1,5 @@
 ﻿using Koek;
+using Prometheus;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -29,6 +30,14 @@ namespace Vltk.Interpreter.Gui
         private IntPtr _targetWindow;
 
         private readonly ExpiringCollection<double> _latencyMeasurements = new(TimeSpan.FromSeconds(1));
+
+        private static readonly Gauge CurrentLatency = Metrics.CreateGauge("vltk_interpreter_detected_latency_seconds", "The most recently calculated latency.");
+
+        private static readonly Histogram LatencyHistogram = Metrics.CreateHistogram("vltk_interpreter_detected_latencies_seconds", "A histogram of recently calculated latencies.",
+            new HistogramConfiguration
+            {
+                Buckets = Histogram.ExponentialBuckets(0.1, 2, 8)
+            });
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
@@ -101,6 +110,7 @@ namespace Vltk.Interpreter.Gui
 
                         var value = diff.TotalMilliseconds;
                         _latencyMeasurements.Add(value);
+                        LatencyHistogram.Observe(value / 1000);
                     }
                 }
 
@@ -113,9 +123,15 @@ namespace Vltk.Interpreter.Gui
                 }
                 else
                 {
-                    MessageArea.Text = "No timing signal detected";
+                    MessageArea.Text = "No timing signal detected" + Environment.NewLine + "Do not cover the captured window";
                     LatencyLabel.Text = "";
                 }
+
+                var latest = _latencyMeasurements.Cast<double?>().LastOrDefault();
+                if (latest.HasValue)
+                    CurrentLatency.Set(latest.Value / 1000);
+                else
+                    CurrentLatency.Unpublish();
             }
             catch (Exception ex)
             {
