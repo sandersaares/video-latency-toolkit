@@ -36,7 +36,24 @@ namespace Vltk.Interpreter.Gui
         private static readonly Histogram LatencyHistogram = Metrics.CreateHistogram("vltk_interpreter_detected_latencies_seconds", "A histogram of recently calculated latencies.",
             new HistogramConfiguration
             {
-                Buckets = Histogram.ExponentialBuckets(0.1, 2, 8)
+                Buckets = new[]
+                {
+                    0.1,
+                    0.5,
+                    1.0,
+                    1.5,
+                    2.0,
+                    2.5,
+                    3,
+                    4,
+                    5,
+                    10,
+                    20,
+                    30,
+                    40,
+                    50,
+                    60
+                }
             });
 
         private void Timer_Tick(object? sender, EventArgs e)
