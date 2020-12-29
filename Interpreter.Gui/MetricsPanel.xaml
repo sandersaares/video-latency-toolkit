@@ -27,7 +27,7 @@
     <TextBlock x:Name="GrantAccessLabel" Grid.Column="1" HorizontalAlignment="Left" Margin="8" Visibility="Collapsed"
                TextWrapping="WrapWithOverflow">
       <Hyperlink Click="AccessGrant_Click">
-        Requires access grant or run as Administrator
+        Requires permissions or "run as Administrator"
       </Hyperlink>
     </TextBlock>
   </Grid>

@@ -14,13 +14,17 @@ namespace Vltk.Interpreter.Gui
         {
             InitializeComponent();
 
+            _metricsPort = App.MetricsPort ?? VltkConstants.InterpreterMetricServerPort;
+            _metricsUrl = $"http://localhost:{_metricsPort}/metrics";
+
             MetricsLink.Inlines.Add(_metricsUrl);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
 
-        private static readonly string _metricsUrl = $"http://localhost:{VltkConstants.InterpreterMetricServerPort}/metrics";
+        private readonly ushort _metricsPort;
+        private readonly string _metricsUrl;
 
         private IMetricServer? _server;
 
@@ -28,7 +32,7 @@ namespace Vltk.Interpreter.Gui
         {
             try
             {
-                _server = new MetricServer(VltkConstants.InterpreterMetricServerPort);
+                _server = new MetricServer(_metricsPort);
                 _server.Start();
 
                 StatusLabel.Text = "";
@@ -69,7 +73,7 @@ namespace Vltk.Interpreter.Gui
 
         private void AccessGrant_Click(object sender, RoutedEventArgs e)
         {
-            var command = $"netsh http add urlacl url=http://+:{VltkConstants.InterpreterMetricServerPort}/metrics user={Environment.UserDomainName}\\{Environment.UserName}";
+            var command = $"netsh http add urlacl url=http://+:{_metricsPort}/metrics user={Environment.UserDomainName}\\{Environment.UserName}";
 
             MessageBox.Show(command, "Execute as Administrator to grant access");
         }
