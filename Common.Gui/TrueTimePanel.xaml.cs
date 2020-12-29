@@ -146,6 +146,6 @@ namespace Vltk.Common.Gui
             _refreshTimer.Stop();
         }
 
-        private static readonly Gauge _trueTimeGauge = Metrics.CreateGauge("synchronized_time_seconds", "The true time obtained from the timeserver.");
+        private static readonly Gauge _trueTimeGauge = Metrics.CreateGauge("synchronized_unixtime_seconds", "The true time obtained from the timeserver.");
     }
 }
