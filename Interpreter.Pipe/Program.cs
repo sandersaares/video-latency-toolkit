@@ -57,7 +57,8 @@ namespace Vltk.Interpreter.Pipe
             {
                 try
                 {
-                    Console.Error.WriteLine($"Reading sample of {sampleSize} bytes.");
+                    if (_verbose)
+                        Console.Error.WriteLine($"Reading sample of {sampleSize} bytes.");
 
                     byte[] sample;
                     try
@@ -79,7 +80,8 @@ namespace Vltk.Interpreter.Pipe
                         return;
                     }
 
-                    Console.Error.WriteLine("Processing sample.");
+                    if (_verbose)
+                        Console.Error.WriteLine("Processing sample.");
 
                     var result = decoder.Decode(new Nv12LuminanceSource(sample, _width, _height));
 
@@ -101,7 +103,8 @@ namespace Vltk.Interpreter.Pipe
                     }
                     else
                     {
-                        Console.Error.WriteLine("No signal found in sample.");
+                        if (_verbose)
+                            Console.Error.WriteLine("No signal found in sample.");
                     }
                 }
                 catch (Exception ex)
@@ -131,6 +134,8 @@ namespace Vltk.Interpreter.Pipe
         private static int _width;
         private static int _height;
 
+        private static bool _verbose;
+
         private static bool ParseArguments(string[] args)
         {
             var showHelp = false;
@@ -148,6 +153,7 @@ namespace Vltk.Interpreter.Pipe
                 { "width=", "Width of a single input sample.", (int val) => _width = val },
                 { "height=", "Height of a single input sample.", (int val) => _height = val },
                 "",
+                { "verbose", "Emits extra detailed diagnostic output on stderr.", val => _verbose = val != null },
                 { "debugger", "Requests a debugger to be attached before data processing starts.", val => debugger = val != null, true }
             };
 
