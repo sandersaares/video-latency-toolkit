@@ -166,6 +166,7 @@ namespace Vltk.Interpreter.Gui
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
             _timer.Stop();
+            CurrentLatency.Unpublish();
         }
 
         private void Reset()
@@ -174,6 +175,7 @@ namespace Vltk.Interpreter.Gui
             MessageArea.Text = "";
             LatencyLabel.Text = "";
             _latencyMeasurements.Clear();
+            CurrentLatency.Unpublish();
 
             TrueTime.TimeserverUrl = null;
 
