@@ -32,7 +32,7 @@ There is some processing latency - perform a "dry run" by providing generator ou
 
 # Metrics
 
-The app exposes the latency in the form of Prometheus metrics, on the http://server:19891/metrics URL. You can use the `metrics-port` command line argument to specify a different port, allowing multiple instances of the app to publish metrics concurrently.
+Interpreter.Gui exposes the latency in the form of Prometheus metrics, on the http://server:19891/metrics URL. You can use the `metrics-port` command line argument to specify a different port, allowing multiple instances of the app to publish metrics concurrently.
 
 # System requirements
 
