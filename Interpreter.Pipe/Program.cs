@@ -116,7 +116,7 @@ namespace Vltk.Interpreter.Pipe
             }
         }
 
-        private static void OnLatencyUpdated(object? sender, SignalInterpreter.ResultEventArgs e)
+        private static void OnLatencyUpdated(object sender, SignalInterpreter.ResultEventArgs e)
         {
             var result = new InterpreterResult
             {

@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Koek" Version="1.5.0" />
+    <PackageReference Include="Koek" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -38,9 +38,10 @@
         <ColumnDefinition />
       </Grid.ColumnDefinitions>
 
-      <TextBlock HorizontalAlignment="Right" Margin="8"
+      <TextBlock HorizontalAlignment="Right" Margin="8" FontSize="20"
                  Text="Moving average latency:" />
-      <TextBlock x:Name="LatencyLabel" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8" />
+      <TextBlock x:Name="LatencyLabel" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8"
+                 FontSize="20" />
     </Grid>
     
     <gui:TrueTimePanel x:Name="TrueTime" Grid.Row="3" Grid.ColumnSpan="3" />

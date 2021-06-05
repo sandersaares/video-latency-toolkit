@@ -1,4 +1,8 @@
 ﻿using DashTimeserver.Client;
+using Koek;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Nito.AsyncEx;
 using Prometheus;
 using System;
 using System.ComponentModel;
@@ -16,11 +20,14 @@ namespace Vltk.Common.Gui
         private static readonly TimeSpan SyncTimeout = TimeSpan.FromSeconds(10);
 
         /// <summary>
-        /// The URL of the dash-timeserver to use for establishing clock sync.
+        /// The URL of the timeserver to use for establishing clock sync.
+        /// Can point to either:
+        /// 1) An MPEG-DASH compatible timeserver (xs:datetime format via HTTP URL).
+        /// 2) An NTP timeserver (ntp://ntp.example.com URL).
         /// 
         /// If null, time sync is disabled.
         /// </summary>
-        public Uri? TimeserverUrl
+        public Uri TimeserverUrl
         {
             get => _timeserverUrl;
             set
@@ -28,13 +35,19 @@ namespace Vltk.Common.Gui
                 if (_timeserverUrl == value)
                     return;
 
-                if (_timeSource != null)
-                    Task.Run(_timeSource.DisposeAsync);
+                _cookie = new();
+
+                if (_dashTimeSource != null)
+                    Task.Run(_dashTimeSource.DisposeAsync);
+
+                if (_ntpTimeSource != null)
+                    Task.Run(_ntpTimeSource.DisposeAsync);
 
                 _timeserverUrl = value;
                 _syncError = null;
+                _dashTimeSource = null;
+                _ntpTimeSource = null;
                 _timeSource = null;
-                _cookie = new();
 
                 if (_timeserverUrl != null)
                     Task.Run(() => SynchronizeAsync(_cookie));
@@ -46,16 +59,22 @@ namespace Vltk.Common.Gui
         /// </summary>
         public DateTimeOffset? TrueTime => _timeSource?.GetCurrentTime();
 
-        private Uri? _timeserverUrl;
+        private Uri _timeserverUrl;
 
         // Used to differentiate synchronization attempts with different URLs.
-        private object? _cookie;
+        private object _cookie;
 
-        // Set once sync is established. Null while syncing.
-        private SynchronizedTimeSource? _timeSource;
+        // Set once sync is established. Null while syncing or if not using DASH.
+        private SynchronizedTimeSource _dashTimeSource;
+
+        // Null if not using NTP.
+        private NtpTimeSource _ntpTimeSource;
+
+        // Whichever one of the above is to be used. Null if still syncing.
+        private ITimeSource _timeSource;
 
         // Set if sync fails to be established.
-        private string? _syncError;
+        private string _syncError;
 
         private async Task SynchronizeAsync(object cookie)
         {
@@ -63,12 +82,28 @@ namespace Vltk.Common.Gui
 
             try
             {
-                var sts = await SynchronizedTimeSource.CreateAsync(_timeserverUrl, new DummyHttpClientFactory(), timeout.Token);
+                if (_timeserverUrl.Scheme == "ntp")
+                {
+                    var source = new NtpTimeSource(_timeserverUrl, NullLoggerFactory.Instance.CreateLogger<NtpTimeSource>());
 
-                if (_cookie != cookie)
-                    return; // What we did does not matter anymore.
+                    await source.FirstSyncPerformed.WaitAsync(timeout.Token);
 
-                _timeSource = sts;
+                    if (_cookie != cookie)
+                        return; // What we did does not matter anymore.
+
+                    _ntpTimeSource = source;
+                    _timeSource = source;
+                }
+                else
+                {
+                    var sts = await SynchronizedTimeSource.CreateAsync(_timeserverUrl, new DummyHttpClientFactory(), timeout.Token);
+
+                    if (_cookie != cookie)
+                        return; // What we did does not matter anymore.
+
+                    _dashTimeSource = sts;
+                    _timeSource = new DashTimeSource(sts);
+                }
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested)
             {
@@ -111,7 +146,7 @@ namespace Vltk.Common.Gui
             }
         }
 
-        private void OnTimerTick(object? sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
             if (_timeserverUrl == null)
             {

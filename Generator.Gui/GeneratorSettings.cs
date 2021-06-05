@@ -1,5 +1,6 @@
 ﻿using Koek;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -13,9 +14,9 @@ namespace Vltk.Generator.Gui
         public static GeneratorSettings Current { get; }
 
         /// <summary>
-        /// URL of the dash-timeserver that provides the clock synchronization signal.
+        /// URL of the timeserver that provides the clock synchronization signal.
         /// </summary>
-        public string? TimeserverUrl { get; set; }
+        public string? TimeserverUrl { get; set; } = "ntp://time.windows.com";
 
         public void Save()
         {
@@ -28,7 +29,7 @@ namespace Vltk.Generator.Gui
             }
             catch (Exception ex)
             {
-                Helpers.Trace<GeneratorSettings>.Error($"Failed to asve settings file: {ex.Message}");
+                Trace.WriteLine($"Failed to asve settings file: {ex.Message}");
             }
         }
 
@@ -46,7 +47,7 @@ namespace Vltk.Generator.Gui
             }
             catch (Exception ex)
             {
-                Helpers.Trace<GeneratorSettings>.Error($"Failed to read saved settings file: {ex.Message}");
+                Trace.WriteLine($"Failed to read saved settings file: {ex.Message}");
 
                 return new GeneratorSettings();
             }

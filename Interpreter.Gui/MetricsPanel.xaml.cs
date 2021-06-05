@@ -26,7 +26,7 @@ namespace Vltk.Interpreter.Gui
         private readonly ushort _metricsPort;
         private readonly string _metricsUrl;
 
-        private IMetricServer? _server;
+        private IMetricServer _server;
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {

@@ -1,4 +1,8 @@
 ﻿using DashTimeserver.Client;
+using Koek;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Nito.AsyncEx;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -30,8 +34,11 @@ namespace Vltk.Interpreter.Pipe
 
         public async ValueTask DisposeAsync()
         {
-            if (_sts != null)
-                await _sts.DisposeAsync();
+            if (_dashTimeSource != null)
+                await _dashTimeSource.DisposeAsync();
+
+            if (_ntpTimeSource != null)
+                await _ntpTimeSource.DisposeAsync();
         }
 
         public sealed class ResultEventArgs : EventArgs
@@ -45,20 +52,20 @@ namespace Vltk.Interpreter.Pipe
         /// Raised when any error occurs during signal processing.
         /// Errors are ignored and retries performed whenever possible.
         /// </summary>
-        public event ErrorEventHandler? Error;
+        public event ErrorEventHandler Error;
 
         /// <summary>
         /// Raised when the video stream latency has been determined.
         /// </summary>
-        public event EventHandler<ResultEventArgs>? LatencyUpdated;
+        public event EventHandler<ResultEventArgs> LatencyUpdated;
 
         private readonly IHttpClientFactory _httpClientFactory;
 
         private readonly object _lock = new();
 
-        // If not null, we are using time synchronization via dash-timeserver.
+        // If not null, we are using time synchronization via an external timeserver (either DASH or NTP).
         // If null, we assume external synchronization.
-        private Uri? _timeserverUrl;
+        private Uri _timeserverUrl;
 
         // Used to differentiate synchronization attempts with different URLs.
         // Results arriving with a different cookie are out of date and discarded.
@@ -66,10 +73,17 @@ namespace Vltk.Interpreter.Pipe
 
         // Set once synchronization completes.
         // Remains set until timeserver URL is changed.
-        private SynchronizedTimeSource? _sts;
+        private SynchronizedTimeSource _dashTimeSource;
 
-        // If we have a timeserver URL, we can wait on this to ensure that _sts is available.
-        private Task<bool>? _synchronizeTask;
+        // Set once synchronization completes.
+        // Remains set until timeserver URL is changed.
+        private NtpTimeSource _ntpTimeSource;
+
+        // Whichever one of the above time sources is set, for ease of use.
+        private ITimeSource _timeSource;
+
+        // If we have a timeserver URL, we can wait on this to ensure that it is available.
+        private Task<bool> _synchronizeTask;
 
         /// <summary>
         /// Adds a payload to be analyzed. Events are asynchronously raised if and when the analysis completes.
@@ -78,7 +92,7 @@ namespace Vltk.Interpreter.Pipe
         {
             Task.Run(async delegate
             {
-                Uri? url = null;
+                Uri url = null;
 
                 if (!string.IsNullOrEmpty(payload.TimeserverUrl) && !Uri.TryCreate(payload.TimeserverUrl, UriKind.Absolute, out url))
                 {
@@ -99,8 +113,8 @@ namespace Vltk.Interpreter.Pipe
 
                     var referenceTime = DateTimeOffset.UtcNow;
 
-                    if (_sts != null)
-                        referenceTime = _sts.GetCurrentTime();
+                    if (_timeSource != null)
+                        referenceTime = _timeSource.GetCurrentTime();
 
                     var originalTimestamp = new DateTimeOffset(payload.TicksUtc, TimeSpan.Zero);
                     var latency = referenceTime - originalTimestamp;
@@ -112,7 +126,7 @@ namespace Vltk.Interpreter.Pipe
         }
 
         /// <returns>True to process the signal that triggered synchronization. False to ignore the signal.</returns>
-        private Task<bool> UpdateSynchronizedTimeAsync(Uri? url, out object cookie)
+        private Task<bool> UpdateSynchronizedTimeAsync(Uri url, out object cookie)
         {
             lock (_lock)
             {
@@ -122,13 +136,19 @@ namespace Vltk.Interpreter.Pipe
                     return _synchronizeTask!;
                 }
 
+                _timeserverCookie = new();
+
                 // If we had existing time source, dispose in the background.
-                if (_sts != null)
-                    Task.Run(_sts.DisposeAsync);
+                if (_dashTimeSource != null)
+                    Task.Run(_dashTimeSource.DisposeAsync);
+
+                if (_ntpTimeSource != null)
+                    Task.Run(_ntpTimeSource.DisposeAsync);
 
                 _timeserverUrl = url;
-                _sts = null;
-                _timeserverCookie = new();
+                _dashTimeSource = null;
+                _ntpTimeSource = null;
+                _timeSource = null;
                 cookie = _timeserverCookie;
 
                 _synchronizeTask = SynchronizeAsync(_timeserverCookie);
@@ -147,15 +167,35 @@ namespace Vltk.Interpreter.Pipe
 
             try
             {
-                var sts = await SynchronizedTimeSource.CreateAsync(_timeserverUrl, _httpClientFactory, timeout.Token);
-
-                lock (_lock)
+                if (_timeserverUrl.Scheme == "ntp")
                 {
-                    if (_timeserverCookie != cookie)
-                        return false; // What we did does not matter anymore.
+                    var source = new NtpTimeSource(_timeserverUrl, NullLoggerFactory.Instance.CreateLogger<NtpTimeSource>());
 
-                    _sts = sts;
-                    return true;
+                    await source.FirstSyncPerformed.WaitAsync(timeout.Token);
+
+                    lock (_lock)
+                    {
+                        if (_timeserverCookie != cookie)
+                            return false; // What we did does not matter anymore.
+
+                        _ntpTimeSource = source;
+                        _timeSource = source;
+                        return true;
+                    }
+                }
+                else
+                {
+                    var sts = await SynchronizedTimeSource.CreateAsync(_timeserverUrl, _httpClientFactory, timeout.Token);
+
+                    lock (_lock)
+                    {
+                        if (_timeserverCookie != cookie)
+                            return false; // What we did does not matter anymore.
+
+                        _dashTimeSource = sts;
+                        _timeSource = new DashTimeSource(sts);
+                        return true;
+                    }
                 }
             }
             catch (OperationCanceledException) when (timeout.IsCancellationRequested)

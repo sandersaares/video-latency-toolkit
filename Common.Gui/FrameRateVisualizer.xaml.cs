@@ -22,7 +22,7 @@ namespace Vltk.Common.Gui
             Unloaded += OnUnloaded;
         }
 
-        private void OnTimerTick(object? sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
             FpsLabel.Text = _renders.GetCount().ToString("N0", CultureInfo.InvariantCulture);
             _fps.Set(_renders.GetCount());
